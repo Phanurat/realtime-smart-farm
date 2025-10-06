@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Smart Farm Dashboard</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial; margin: 20px; background: #f0f0f0; }
+    h1 { color: #333; }
+    #status { margin-top: 10px; font-size: 1.2em; }
+  </style>
+</head>
+<body>
+  <h1>Smart Farm Dashboard</h1>
+  <canvas id="moistureChart" width="600" height="300"></canvas>
+  <div id="status">Status: --</div>
+
+  <script>
+    const socket = io('http://192.168.1.108:5000'); // IP server
+    const statusEl = document.getElementById('status');
+    const ctx = document.getElementById('moistureChart').getContext('2d');
+
+    let labels = [];
+    let dataPoints = [];
+
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Soil Moisture (%)',
+          data: dataPoints,
+          borderColor: 'blue',
+          backgroundColor: 'rgba(0,0,255,0.2)',
+          fill: true,
+          tension: 0.2
+        }]
+      },
+      options: {
+        scales: { y: { min: 0, max: 100 } }
+      }
+    });
+
+    socket.on('updateData', (data) => {
+      const now = new Date().toLocaleTimeString();
+      const moisture = data.moisture;
+
+      labels.push(now);
+      dataPoints.push(moisture);
+
+      if (labels.length > 20) {
+        labels.shift();
+        dataPoints.shift();
+      }
+
+      chart.update();
+
+      if (moisture < 40) {
+        statusEl.textContent = "⚠️ Soil is dry! Water the plant 🌱";
+        statusEl.style.color = "red";
+      } else {
+        statusEl.textContent = "Soil moisture is okay 👍";
+        statusEl.style.color = "green";
+      }
+    });
+  </script>
+</body>
+</html>

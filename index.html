@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Realtime Test</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Realtime Data</h1>
+  <pre id="data"></pre>
+
+  <input type="text" id="inputKey" placeholder="Key">
+  <input type="text" id="inputValue" placeholder="Value">
+  <button id="sendBtn">Send</button>
+
+  <script>
+    const socket = io('http://localhost:5000');
+
+    const dataEl = document.getElementById('data');
+    const inputKey = document.getElementById('inputKey');
+    const inputValue = document.getElementById('inputValue');
+    const sendBtn = document.getElementById('sendBtn');
+
+    // รับข้อมูลจาก server
+    socket.on('updateData', (data) => {
+      dataEl.textContent = JSON.stringify(data, null, 2);
+    });
+
+    // ส่งข้อมูลไป server
+    sendBtn.addEventListener('click', () => {
+      const key = inputKey.value;
+      const value = inputValue.value;
+      if(key && value) {
+        socket.emit('sendData', { [key]: value });
+      }
+    });
+  </script>
+</body>
+</html>
