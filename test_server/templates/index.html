@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 LED Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f4f7;
+        }
+        .container {
+            text-align: center;
+            padding: 30px;
+            border-radius: 8px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        #ledStatus {
+            font-size: 20px;
+            margin-top: 20px;
+            color: #555;
+        }
+        #ledSwitch {
+            margin-top: 20px;
+            transform: scale(1.5);
+        }
+    </style>
+    <script>
+        // ฟังก์ชันที่ใช้ส่งข้อมูลเปิด/ปิด LED ไปที่ Server
+        function toggleLed() {
+            let status = document.getElementById("ledSwitch").checked;
+            fetch("/led-status", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ status: status })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // อัพเดตข้อความแสดงสถานะ LED
+                document.getElementById("ledStatus").innerText = "LED is " + (status ? "ON" : "OFF");
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>ESP32 LED Control</h1>
+        <p id="ledStatus">LED is {{ 'ON' if led_status else 'OFF' }}</p>
+        <label for="ledSwitch">Turn LED On/Off:</label>
+        <input type="checkbox" id="ledSwitch" onchange="toggleLed()" {% if led_status %}checked{% endif %}>
+    </div>
+</body>
+</html>
