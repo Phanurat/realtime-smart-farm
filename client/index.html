@@ -8,16 +8,21 @@
     body { font-family: Arial; margin: 20px; background: #f0f0f0; }
     h1 { color: #333; }
     #status { margin-top: 10px; font-size: 1.2em; }
+    #moistureValue { font-size: 2em; margin: 10px 0; }
   </style>
 </head>
 <body>
   <h1>Smart Farm Dashboard</h1>
+  <!-- ตัวเลข Soil Moisture -->
+  <div>Current Soil Moisture: <span id="moistureValue">--</span>%</div>
+  
   <canvas id="moistureChart" width="600" height="300"></canvas>
   <div id="status">Status: --</div>
 
   <script>
     const socket = io('http://192.168.1.108:5000'); // IP server
     const statusEl = document.getElementById('status');
+    const moistureValueEl = document.getElementById('moistureValue');
     const ctx = document.getElementById('moistureChart').getContext('2d');
 
     let labels = [];
@@ -45,6 +50,10 @@
       const now = new Date().toLocaleTimeString();
       const moisture = data.moisture;
 
+      // อัปเดตตัวเลขบนหน้าเว็บ
+      moistureValueEl.textContent = moisture;
+
+      // อัปเดตกราฟ
       labels.push(now);
       dataPoints.push(moisture);
 
@@ -55,6 +64,7 @@
 
       chart.update();
 
+      // อัปเดตสถานะ
       if (moisture < 40) {
         statusEl.textContent = "⚠️ Soil is dry! Water the plant 🌱";
         statusEl.style.color = "red";
