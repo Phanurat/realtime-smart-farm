@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💧 Smart Pump Dashboard</title>
+<style>
+  body {
+    font-family: "Prompt", sans-serif;
+    background: linear-gradient(to right, #e0f2fe, #bae6fd);
+    text-align: center;
+    padding: 50px;
+  }
+  h1 { color: #0369a1; font-size: 2.5rem; margin-bottom: 30px; }
+  button {
+    padding: 20px 40px;
+    font-size: 1.8rem;
+    border: none;
+    border-radius: 15px;
+    margin: 10px;
+    cursor: pointer;
+    color: white;
+    transition: 0.3s;
+  }
+  .on { background: #16a34a; box-shadow: 0 0 15px #16a34aaa; }
+  .off { background: #dc2626; box-shadow: 0 0 15px #dc2626aa; }
+  .status { font-size: 1.5rem; margin-top: 10px; }
+</style>
+</head>
+<body>
+<h1>🌾 Smart Pump Dashboard</h1>
+
+<div>
+  <button id="pump1-btn" class="off" onclick="togglePump('pump1')">💧 ปั๊ม 1</button>
+  <p id="pump1-status" class="status">สถานะ: ปิด ❌</p>
+</div>
+
+<div>
+  <button id="pump2-btn" class="off" onclick="togglePump('pump2')">💧 ปั๊ม 2</button>
+  <p id="pump2-status" class="status">สถานะ: ปิด ❌</p>
+</div>
+
+<script>
+const API_BASE = "/";
+
+async function getStatus() {
+  try {
+    const res = await fetch(API_BASE + "pump-status");
+    const data = await res.json();
+    updateUI(data);
+  } catch(err) {
+    console.error(err);
+  }
+}
+
+async function togglePump(pumpId) {
+  try {
+    const res = await fetch(`${API_BASE}toggle?id=${pumpId}`, { method: "POST" });
+    const data = await res.json();
+    updateUI(data);
+  } catch(err) {
+    console.error(err);
+  }
+}
+
+function updateUI(data) {
+  ["pump1", "pump2"].forEach(id => {
+    const btn = document.getElementById(id + "-btn");
+    const statusText = document.getElementById(id + "-status");
+    if (data[id]) {
+      btn.textContent = "💡 ปิดปั๊ม " + (id === "pump1" ? "1" : "2");
+      btn.className = "on";
+      statusText.textContent = "สถานะ: เปิด ✅";
+    } else {
+      btn.textContent = "💧 เปิดปั๊ม " + (id === "pump1" ? "1" : "2");
+      btn.className = "off";
+      statusText.textContent = "สถานะ: ปิด ❌";
+    }
+  });
+}
+
+// อัปเดตสถานะทุก 2 วินาที
+setInterval(getStatus, 2000);
+window.onload = getStatus;
+</script>
+</body>
+</html>
