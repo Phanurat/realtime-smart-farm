@@ -25,10 +25,15 @@
   .on { background: #16a34a; box-shadow: 0 0 15px #16a34aaa; }
   .off { background: #dc2626; box-shadow: 0 0 15px #dc2626aa; }
   .status { font-size: 1.5rem; margin-top: 10px; }
+  .sensor { font-size: 1.8rem; margin-bottom: 30px; }
 </style>
 </head>
 <body>
 <h1>🌾 Smart Pump Dashboard</h1>
+
+<div class="sensor">
+  🌡️ อุณหภูมิ: <span id="temp">--</span> °C &nbsp;&nbsp; | &nbsp;&nbsp; 💧 ความชื้น: <span id="moisture">--</span> %
+</div>
 
 <div>
   <button id="pump1-btn" class="off" onclick="togglePump('pump1')">💧 ปั๊ม 1</button>
@@ -43,6 +48,7 @@
 <script>
 const API_BASE = "/";
 
+// ดึงสถานะปั๊มและค่า sensor
 async function getStatus() {
   try {
     const res = await fetch(API_BASE + "pump-status");
@@ -53,6 +59,7 @@ async function getStatus() {
   }
 }
 
+// toggle ปั๊ม
 async function togglePump(pumpId) {
   try {
     const res = await fetch(`${API_BASE}toggle?id=${pumpId}`, { method: "POST" });
@@ -63,7 +70,12 @@ async function togglePump(pumpId) {
   }
 }
 
+// อัปเดต UI ทั้งปั๊มและ sensor
 function updateUI(data) {
+  // แสดงค่า temperature และ moisture
+  document.getElementById("temp").textContent = data.temperature.toFixed(1);
+  document.getElementById("moisture").textContent = data.moisture.toFixed(0);
+
   ["pump1", "pump2"].forEach(id => {
     const btn = document.getElementById(id + "-btn");
     const statusText = document.getElementById(id + "-status");
@@ -79,7 +91,7 @@ function updateUI(data) {
   });
 }
 
-// อัปเดตสถานะทุก 2 วินาที
+// อัปเดตทุก 2 วินาที
 setInterval(getStatus, 2000);
 window.onload = getStatus;
 </script>
